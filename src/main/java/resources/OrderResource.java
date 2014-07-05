@@ -4,6 +4,7 @@ import domain.Customer;
 import domain.Order;
 import domain.OrderJson;
 import repository.OrderRepository;
+import repository.PaymentRepository;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Form;
@@ -16,15 +17,17 @@ import java.util.stream.Collectors;
 
 public class OrderResource {
     private OrderRepository orderRepository;
+    private PaymentRepository paymentRepository;
     private Customer customer;
     private UriInfo uriInfo;
 
 
 
-    public OrderResource(OrderRepository orderRepository, Customer customer, UriInfo uriInfo) {
-        this.orderRepository = orderRepository;
+    public OrderResource(Customer customer, UriInfo uriInfo, OrderRepository orderRepository, PaymentRepository paymentRepository) {
         this.customer = customer;
         this.uriInfo = uriInfo;
+        this.orderRepository = orderRepository;
+        this.paymentRepository = paymentRepository;
     }
 
     @GET
@@ -50,5 +53,11 @@ public class OrderResource {
     public OrderJson getAllOrderOfCustomer(@PathParam("id")int id){
         Order order = orderRepository.getOrderById(customer.getId(), id);
         return new OrderJson(order,customer,uriInfo);
+    }
+
+    @Path("/{id}/payment")
+    public PaymentResource getPaymentOfOrder(@PathParam("id") int id){
+        Order order = orderRepository.getOrderById(customer.getId(), id);
+        return new PaymentResource(customer,order,uriInfo,paymentRepository);
     }
 }

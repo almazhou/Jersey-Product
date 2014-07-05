@@ -1,5 +1,6 @@
 import domain.Customer;
 import domain.Order;
+import domain.Payment;
 import exception.CustomerNotFoundException;
 import exception.OrderNotFoundException;
 import exceptionHandler.CustomerNotFoundExceptionMapper;
@@ -15,6 +16,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import repository.CustomerRepository;
 import repository.OrderRepository;
+import repository.PaymentRepository;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
@@ -26,6 +28,7 @@ import java.util.Map;
 
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 @RunWith(MockitoJUnitRunner.class)
@@ -35,6 +38,9 @@ public class OrderResourceTest extends JerseyTest {
 
     @Mock
     private CustomerRepository mockCustomerRepository;
+
+    @Mock
+    private PaymentRepository mockPaymentRepository;
 
     @Captor
     private ArgumentCaptor<Order> orderArgumentCaptor;
@@ -49,6 +55,7 @@ public class OrderResourceTest extends JerseyTest {
             protected void configure() {
                 bind(mockOrderRepository).to(OrderRepository.class);
                 bind(mockCustomerRepository).to(CustomerRepository.class);
+                bind(mockPaymentRepository).to(PaymentRepository.class);
             }
         };
         return new ResourceConfig().register(CustomerResource.class).register(binder).register(OrderNotFoundExceptionMapper.class).register(CustomerNotFoundExceptionMapper.class);
@@ -117,6 +124,23 @@ public class OrderResourceTest extends JerseyTest {
         Response response = target("/customers/1/orders/1").request().get();
 
         assertThat(response.getStatus(),is(400));
+    }
 
+    @Test
+    public void should_get_200_when_get_payment_of_order() throws Exception {
+        when(mockCustomerRepository.getCustomer(1)).thenReturn(new Customer(1,"test name"));
+        when(mockOrderRepository.getOrderById(1, 1)).thenReturn(new Order(1,45.0));
+        when(mockPaymentRepository.getOrderPayment()).thenReturn(new Payment(45.0));
+
+        Response response = target("/customers/1/orders/1/payment").request().get();
+
+        assertThat(response.getStatus(),is(200));
+
+        Map payment = response.readEntity(Map.class);
+
+        assertThat(payment.get("amount"),is(45.0));
+        assertThat(payment.get("orderId"),is(1));
+        assertThat(payment.get("customerId"),is(1));
+        assertTrue(((String)payment.get("uri")).contains("/customers/1/orders/1/payment"));
     }
 }

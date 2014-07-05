@@ -12,6 +12,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import repository.CustomerRepository;
 import repository.OrderRepository;
+import repository.PaymentRepository;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
@@ -34,6 +35,9 @@ public class CustomerResourceTest extends JerseyTest {
     @Mock
     OrderRepository mockOrderRepository;
 
+    @Mock
+    PaymentRepository mockPaymentRepository;
+
     @Captor
     ArgumentCaptor<Customer> customerArgumentCaptor;
 
@@ -44,6 +48,7 @@ public class CustomerResourceTest extends JerseyTest {
             protected void configure() {
                 bind(mockCustomerRepository).to(CustomerRepository.class);
                 bind(mockOrderRepository).to(OrderRepository.class);
+                bind(mockPaymentRepository).to(PaymentRepository.class);
             }
         };
         return new ResourceConfig().register(CustomerResource.class).register(binder).register(CustomerNotFoundExceptionMapper.class);

@@ -2,6 +2,7 @@ import domain.Customer;
 import json.CustomerJson;
 import repository.CustomerRepository;
 import repository.OrderRepository;
+import repository.PaymentRepository;
 import resources.OrderResource;
 
 import javax.inject.Inject;
@@ -18,6 +19,9 @@ public class CustomerResource {
 
     @Inject
     OrderRepository orderRepository;
+
+    @Inject
+    PaymentRepository paymentRepository;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -48,6 +52,6 @@ public class CustomerResource {
     @Path("/{id}/orders/")
     public OrderResource getOrderResource(@PathParam("id") int id, @Context UriInfo uriInfo){
         Customer customer = customerRepository.getCustomer(id);
-        return new OrderResource(orderRepository,customer,uriInfo);
+        return new OrderResource(customer, uriInfo, orderRepository,paymentRepository);
     }
 }

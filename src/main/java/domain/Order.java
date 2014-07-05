@@ -9,6 +9,11 @@ public class Order {
         this.totalCost = totalCost;
     }
 
+    public Order(int id, double totalCost) {
+        this.id = id;
+        this.totalCost = totalCost;
+    }
+
     public double getTotalCost() {
         return totalCost;
     }
