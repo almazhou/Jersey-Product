@@ -1,0 +1,32 @@
+apply plugin: 'idea'
+apply plugin: 'java'
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    jerseyVersion = '2.9'
+    mockitoVersion = '1.9.5'
+    junitVersion = '4.10'
+}
+
+dependencies {
+    compile 'javax.ws.rs:javax.ws.rs-api:2.0'
+    compile 'postgresql:postgresql:9.0-801.jdbc4'
+
+    compile "org.glassfish.jersey.core:jersey-server:$jerseyVersion"
+    compile "org.glassfish.jersey.containers:jersey-container-grizzly2-http:$jerseyVersion"
+
+    compile "org.glassfish.jersey.media:jersey-media-json-jackson:$jerseyVersion"
+
+    testCompile "org.glassfish.jersey.test-framework:jersey-test-framework-core:$jerseyVersion"
+    testCompile "org.glassfish.jersey.test-framework.providers:jersey-test-framework-provider-grizzly2:$jerseyVersion"
+
+    testCompile "org.mockito:mockito-all:$mockitoVersion"
+    testCompile "junit:junit:$junitVersion"
+    compile 'org.mybatis:mybatis:3.2.7'
+}
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
