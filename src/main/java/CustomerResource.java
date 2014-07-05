@@ -1,6 +1,8 @@
 import domain.Customer;
 import json.CustomerJson;
 import repository.CustomerRepository;
+import repository.OrderRepository;
+import resources.OrderResource;
 
 import javax.inject.Inject;
 import javax.ws.rs.*;
@@ -13,6 +15,9 @@ import java.util.stream.Collectors;
 public class CustomerResource {
     @Inject
     CustomerRepository customerRepository;
+
+    @Inject
+    OrderRepository orderRepository;
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
@@ -29,5 +34,20 @@ public class CustomerResource {
         customerRepository.saveCustomer(customer);
         URI location = URI.create(uriInfo.getBaseUri() + "customers/" + String.valueOf(customer.getId()));
         return Response.created(location).build();
+    }
+
+
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public CustomerJson getCustomerById(@PathParam("id") int id, @Context UriInfo uriInfo){
+        Customer customer = customerRepository.getCustomer(id);
+        return new CustomerJson(customer,uriInfo);
+    }
+
+    @Path("/{id}/orders/")
+    public OrderResource getOrderResource(@PathParam("id") int id, @Context UriInfo uriInfo){
+        Customer customer = customerRepository.getCustomer(id);
+        return new OrderResource(orderRepository,customer,uriInfo);
     }
 }

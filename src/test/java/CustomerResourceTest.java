@@ -11,6 +11,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import repository.CustomerRepository;
+import repository.OrderRepository;
 
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Application;
@@ -30,6 +31,9 @@ public class CustomerResourceTest extends JerseyTest {
     @Mock
     CustomerRepository mockCustomerRepository;
 
+    @Mock
+    OrderRepository mockOrderRepository;
+
     @Captor
     ArgumentCaptor<Customer> customerArgumentCaptor;
 
@@ -39,6 +43,7 @@ public class CustomerResourceTest extends JerseyTest {
             @Override
             protected void configure() {
                 bind(mockCustomerRepository).to(CustomerRepository.class);
+                bind(mockOrderRepository).to(OrderRepository.class);
             }
         };
         return new ResourceConfig().register(CustomerResource.class).register(binder).register(CustomerNotFoundExceptionMapper.class);
@@ -78,6 +83,30 @@ public class CustomerResourceTest extends JerseyTest {
         assertThat(customerArgumentCaptor.getValue().getName(),is("customer1"));
 
         assertTrue(post.getHeaderString("location").contains("/customers/"));
+
+    }
+
+    @Test
+    public void should_get_200_for_get_1_customer() throws Exception {
+        Customer customer = new Customer(1, "test name");
+        when(mockCustomerRepository.getCustomer(1)).thenReturn(customer);
+        Response response = target("/customers/1").request().get();
+
+        assertThat(response.getStatus(),is(200));
+
+        Map customerJson = response.readEntity(Map.class);
+
+        assertThat(customerJson.get("name"),is("test name"));
+
+        assertThat(customerJson.get("id"),is(1));
+    }
+
+    @Test
+    public void should_get_400_when_cannot_get_customer() throws Exception {
+        when(mockCustomerRepository.getCustomer(1)).thenThrow(CustomerNotFoundException.class);
+        Response response = target("/customers/1").request().get();
+
+        assertThat(response.getStatus(),is(400));
 
     }
 }
