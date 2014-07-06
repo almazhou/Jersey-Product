@@ -48,6 +48,9 @@ public class OrderResourceTest extends JerseyTest {
     @Captor
     private ArgumentCaptor<Customer> customerArgumentCaptor;
 
+    @Captor
+    private ArgumentCaptor<Payment> paymentArgumentCaptor;
+
     @Override
     protected Application configure() {
         AbstractBinder binder = new AbstractBinder() {
@@ -142,5 +145,23 @@ public class OrderResourceTest extends JerseyTest {
         assertThat(payment.get("orderId"),is(1));
         assertThat(payment.get("customerId"),is(1));
         assertTrue(((String)payment.get("uri")).contains("/customers/1/orders/1/payment"));
+    }
+
+    @Test
+    public void should_return_201_when_post_one_payment() throws Exception {
+        when(mockCustomerRepository.getCustomer(1)).thenReturn(new Customer(1,"test name"));
+        when(mockOrderRepository.getOrderById(1, 1)).thenReturn(new Order(1, 45.0));
+
+        Response response = target("/customers/1/orders/1/payment").request().post(Entity.form(new Form().param("amount","45.0")));
+
+        assertThat(response.getStatus(), is(201));
+        assertThat(response.getLocation().toString().contains("/customers/1/payment/"), is(true));
+
+        verify(mockPaymentRepository).savePayment(customerArgumentCaptor.capture(),orderArgumentCaptor.capture(),paymentArgumentCaptor.capture());
+
+        assertThat(customerArgumentCaptor.getValue().getName(),is("test name"));
+        assertThat(orderArgumentCaptor.getValue().getTotalCost(),is(45.0));
+        assertThat(paymentArgumentCaptor.getValue().getAmount(),is(45.0));
+
     }
 }
