@@ -1,4 +1,6 @@
 import domain.Customer;
+import domain.Order;
+import domain.Payment;
 import exception.CustomerNotFoundException;
 import exceptionHandler.CustomerNotFoundExceptionMapper;
 import org.glassfish.hk2.utilities.binding.AbstractBinder;
@@ -113,5 +115,23 @@ public class CustomerResourceTest extends JerseyTest {
 
         assertThat(response.getStatus(),is(400));
 
+    }
+
+    @Test
+    public void should_return_200_for_get_all_payments() throws Exception {
+        Payment payment = new Payment(45.0,1);
+        Customer customer = new Customer(1, "zhouxuan");
+        when(mockCustomerRepository.getCustomer(1)).thenReturn(customer);
+        when(mockPaymentRepository.getPaymentByCustomer(1)).thenReturn(Arrays.asList(payment));
+        when(mockOrderRepository.getOrderById(1,1)).thenReturn(new Order(1,45.0));
+
+        Response response = target("/customers/1/payment").request().get();
+
+        assertThat(response.getStatus(),is(200));
+
+        List list = response.readEntity(List.class);
+        Map paymentGot = (Map) list.get(0);
+
+        assertThat(paymentGot.get("amount"),is(45.0));
     }
 }

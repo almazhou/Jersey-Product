@@ -30,6 +30,12 @@ public class PaymentResource {
         this.paymentRepository = paymentRepository;
     }
 
+    public PaymentResource(Customer customer, UriInfo uriInfo, PaymentRepository paymentRepository) {
+        this.customer = customer;
+        this.uriInfo = uriInfo;
+        this.paymentRepository = paymentRepository;
+    }
+
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public PaymentJson getPaymentOfOrder(){
@@ -45,4 +51,6 @@ public class PaymentResource {
         String location = "/customers/" + String.valueOf(customer.getId()) + "/payment/" + String.valueOf(payment.getId());
         return Response.created(URI.create(location)).build();
     }
+
+
 }

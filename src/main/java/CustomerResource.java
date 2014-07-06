@@ -1,5 +1,7 @@
 import domain.Customer;
+import domain.Payment;
 import json.CustomerJson;
+import json.PaymentJson;
 import repository.CustomerRepository;
 import repository.OrderRepository;
 import repository.PaymentRepository;
@@ -53,5 +55,15 @@ public class CustomerResource {
     public OrderResource getOrderResource(@PathParam("id") int id, @Context UriInfo uriInfo){
         Customer customer = customerRepository.getCustomer(id);
         return new OrderResource(customer, uriInfo, orderRepository,paymentRepository);
+    }
+
+    @Path("/{id}/payment")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public List<PaymentJson> getPaymentResource(@PathParam("id") int id,@Context UriInfo uriInfo){
+        Customer customer = customerRepository.getCustomer(id);
+        List<Payment> payments = paymentRepository.getPaymentByCustomer(customer.getId());
+
+        return payments.stream().map(payment -> new PaymentJson(customer, orderRepository.getOrderById(customer.getId(), payment.getOrderId()), uriInfo, payment)).collect(Collectors.toList());
     }
 }
